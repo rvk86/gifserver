@@ -1,4 +1,4 @@
-gcloud compute instances create gifmaker-1 \
+gcloud compute instances create gifmaker-3 \
     --project=mapmaker-330220 \
     --zone=us-central1-a \
     --machine-type=n1-standard-2 \
@@ -13,5 +13,5 @@ gcloud compute instances create gifmaker-1 \
     --no-shielded-secure-boot \
     --shielded-vtpm \
     --shielded-integrity-monitoring \
-    --reservation-affinity=any
-    --metadata-from-file startup-script=./startup-script.sh \
+    --reservation-affinity=any \
+    --metadata-from-file startup-script=startup_script.sh
