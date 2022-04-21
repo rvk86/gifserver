@@ -1,0 +1,17 @@
+gcloud compute instances create gifmaker-1 \
+    --project=mapmaker-330220 \
+    --zone=us-central1-a \
+    --machine-type=n1-standard-2 \
+    --network-interface=network-tier=PREMIUM,subnet=default \
+    --maintenance-policy=TERMINATE \
+    --service-account=firebase-adminsdk-uppld@mapmaker-330220.iam.gserviceaccount.com \
+    --scopes=https://www.googleapis.com/auth/cloud-platform \
+    --accelerator=count=1,type=nvidia-tesla-t4 \
+    --enable-display-device \
+    --tags=http-server,https-server \
+    --create-disk=auto-delete=yes,boot=yes,device-name=gifmaker-1,image=projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20220419,mode=rw,size=10,type=projects/mapmaker-330220/zones/us-central1-a/diskTypes/pd-balanced \
+    --no-shielded-secure-boot \
+    --shielded-vtpm \
+    --shielded-integrity-monitoring \
+    --reservation-affinity=any
+    --metadata-from-file startup-script=./startup-script.sh \
