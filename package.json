@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node build/app.js",
-    "build": "npm run tsc"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
