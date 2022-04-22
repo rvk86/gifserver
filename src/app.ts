@@ -14,13 +14,17 @@ const url =
 
 const app = express();
 
-app.get('/', async (req, res) => {
+app.get('/save-gif', async (req, res) => {
   const gif = await getGif(url);
   const gifFile = bucket.file(`ny.gif`);
   await gifFile.save(gif);
   gifFile.makePublic();
   console.log("URL", gifFile.publicUrl());
   res.status(200).send(gifFile.publicUrl()).end();
+});
+
+app.get('/', (req, res) => {
+  res.status(200).send('OK').end();
 });
 
 // Start the server
