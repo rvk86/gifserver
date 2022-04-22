@@ -15,8 +15,12 @@ const url =
 const app = express();
 
 app.get('/save-gif', async (req, res) => {
-  const gif = await getGif(url);
-  const gifFile = bucket.file(`ny.gif`);
+  if (!req.query.url || !req.query.locationCode) {
+    res.status(404).send('not all query params present');
+    return;
+  }
+  const gif = await getGif(req.query.url as string);
+  const gifFile = bucket.file(`${req.query.locationCode}.gif`);
   await gifFile.save(gif);
   gifFile.makePublic();
   console.log("URL", gifFile.publicUrl());
@@ -61,16 +65,16 @@ function getGif(website: string) {
     });
     await page.evaluate(() =>
       // @ts-ignore
-      window.setControlSettings({ autoRotate: true, autoRotateSpeed: 50 })
+      window.setControlSettings({ autoRotate: true, autoRotateSpeed: 0.2 })
     );
-    // await page.evaluate(() =>
-    //   setTimeout(
-    //     () =>
-    //       // @ts-ignore
-    //       window.setControlSettings({ autoRotate: true, autoRotateSpeed: 4 }),
-    //     15000
-    //   )
-    // );
+    await page.evaluate(() =>
+      setTimeout(
+        () =>
+          // @ts-ignore
+          window.setControlSettings({ autoRotate: true, autoRotateSpeed: 10 }),
+        15000
+      )
+    );
     await page.waitForTimeout(100);
 
     const canvas = createCanvas(width, height);
