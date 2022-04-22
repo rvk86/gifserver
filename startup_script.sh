@@ -14,8 +14,8 @@ ln -s /opt/nodejs/bin/node /usr/bin/node
 ln -s /opt/nodejs/bin/npm /usr/bin/npm
 
 # install gpu drivers
-sudo curl -O https://storage.googleapis.com/nvidia-drivers-us-public/GRID/GRID13.0/NVIDIA-Linux-x86_64-470.63.01-grid.run
-sudo bash NVIDIA-Linux-x86_64-470.63.01-grid.run -q -s
+curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py --output install_gpu_driver.py
+sudo python3 install_gpu_driver.py
 
 # pull code from repo
 cd ~

@@ -10,7 +10,7 @@ export const bucket = getStorage().bucket();
 
 const [width, height] = [500, 500];
 const url =
-  "https://cardanospace.mypinata.cloud/ipfs/Qme8kVR1iqQWGtWrZpfzbkEN7ueXR7KqyeKyvYkNtMEJBA";
+  "https://cardanospace.mypinata.cloud/ipfs/Qme8kVR1iqQWGtWrZpfzbkEN7ueXR7KqyeKyvYkNtMEJBA?skipIntro=1";
 
 const app = express();
 
@@ -52,21 +52,21 @@ function getGif(website: string) {
     const page = await browser.newPage();
 
     page.setViewport({ width, height });
-    await page.goto(website + "?skipIntro=1", {
+    await page.goto(website, {
       waitUntil: "domcontentloaded",
     });
     await page.evaluate(() =>
       // @ts-ignore
-      window.setControlSettings({ autoRotate: true, autoRotateSpeed: 0.2 })
+      window.setControlSettings({ autoRotate: true, autoRotateSpeed: 50 })
     );
-    await page.evaluate(() =>
-      setTimeout(
-        () =>
-          // @ts-ignore
-          window.setControlSettings({ autoRotate: true, autoRotateSpeed: 4 }),
-        15000
-      )
-    );
+    // await page.evaluate(() =>
+    //   setTimeout(
+    //     () =>
+    //       // @ts-ignore
+    //       window.setControlSettings({ autoRotate: true, autoRotateSpeed: 4 }),
+    //     15000
+    //   )
+    // );
     await page.waitForTimeout(100);
 
     const canvas = createCanvas(width, height);
