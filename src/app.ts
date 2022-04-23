@@ -65,13 +65,13 @@ function getGif(website: string) {
     });
     await page.evaluate(() =>
       // @ts-ignore
-      window.setControlSettings({ autoRotate: true, autoRotateSpeed: 0.2 })
+      window.setControlSettings({ autoRotate: true, autoRotateSpeed: 0.1 })
     );
     await page.evaluate(() =>
       setTimeout(
         () =>
           // @ts-ignore
-          window.setControlSettings({ autoRotate: true, autoRotateSpeed: 10 }),
+          window.setControlSettings({ autoRotate: true, autoRotateSpeed: 5 }),
         15000
       )
     );
