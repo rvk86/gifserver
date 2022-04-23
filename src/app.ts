@@ -15,16 +15,15 @@ const url =
 const app = express();
 
 app.get('/save-gif', async (req, res) => {
-  if (!req.query.url || !req.query.locationCode) {
-    res.status(404).send('not all query params present');
-    return;
+  try {
+    const gif = await getGif(req.query.url as string);
+    const gifFile = bucket.file(`${req.query.locationCode}.gif`);
+    await gifFile.save(gif);
+    res.status(200).send('OK').end();
+  } catch(e: any) {
+    console.log(e.message)
+    res.status(400).send(e.message).end();
   }
-  const gif = await getGif(req.query.url as string);
-  const gifFile = bucket.file(`${req.query.locationCode}.gif`);
-  await gifFile.save(gif);
-  gifFile.makePublic();
-  console.log("URL", gifFile.publicUrl());
-  res.status(200).send(gifFile.publicUrl()).end();
 });
 
 app.get('/', (req, res) => {
@@ -41,6 +40,7 @@ app.listen(PORT, () => {
 
 function getGif(website: string) {
   return new Promise<Buffer>(async (resolve, reject) => {
+    try {
     const encoder = new GIFEncoder(width, height);
     encoder.start();
     encoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
@@ -92,6 +92,9 @@ function getGif(website: string) {
     }
     encoder.finish();
     await browser.close();
+  } catch(e) {
+    reject(e);
+  }
   });
 }
 

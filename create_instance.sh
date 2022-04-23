@@ -1,4 +1,5 @@
-gcloud compute instance-templates create preemptible-with-ip \
+# NOT SURE IF THIS WORKS. IN THE INTERFACE YOU NEED TO SELECT EPHEMERAL IP FOR IT TO WORK
+gcloud compute instance-templates create {GIFMAKER_TEMPLATE} \
     --project=mapmaker-330220 \
     --machine-type=n1-standard-2 \
     --network-interface=network=default,network-tier=PREMIUM \
@@ -18,8 +19,31 @@ gcloud compute instance-templates create preemptible-with-ip \
     --shielded-integrity-monitoring \
     --reservation-affinity=any
 
-gcloud compute instance-groups managed create gifmakers-2 --project=mapmaker-330220 --base-instance-name=gifmakers-2 --size=1 --template=preemptible-with-ip --zone=us-central1-a
+gcloud compute instance-groups managed create {GIFMAKERS} \
+    --project=mapmaker-330220 \
+    --base-instance-name={GIFMAKERS} \
+    --size=1 \
+    --template={GIFMAKER_TEMPLATE} \
+    --zone=us-central1-a
 
-gcloud compute instance-groups managed set-named-ports gifmakers-2 --project=mapmaker-330220 --zone=us-central1-a --named-ports=http-server:8080
+gcloud compute instance-groups managed set-named-ports {GIFMAKERS} \
+    --project=mapmaker-330220 \
+    --zone=us-central1-a \
+    --named-ports=http-server:8080
 
-gcloud beta compute instance-groups managed set-autoscaling gifmakers-2 --project=mapmaker-330220 --zone=us-central1-a --cool-down-period=60 --max-num-replicas=10 --min-num-replicas=1 --mode=off --target-cpu-utilization=0.6
+gcloud beta compute instance-groups managed set-autoscaling {GIFMAKERS} \
+    --project=mapmaker-330220 \
+    --zone=us-central1-a \
+    --cool-down-period=60 \
+    --max-num-replicas=10 \
+    --min-num-replicas=1 \
+    --mode=off \
+    --target-cpu-utilization=0.6
+
+gcloud compute firewall-rules create default-allow-http-8080 \
+    --allow tcp:8080 \
+    --source-ranges 0.0.0.0/0 \
+    --target-tags http-server \
+    --description "Allow port 8080 access to http-server"
+
+# ALSO CREATE LOAD BALANCER
