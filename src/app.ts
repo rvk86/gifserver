@@ -5,8 +5,9 @@ import { getStorage } from "firebase-admin/storage";
 import GIFEncoder from "gifencoder";
 import puppeteer from "puppeteer";
 
-admin.initializeApp({ storageBucket: "gs://mapmaker-330220.appspot.com" });
+admin.initializeApp();
 export const bucket = getStorage().bucket();
+const db = admin.firestore();
 
 const [width, height] = [500, 500];
 const url =
@@ -17,9 +18,11 @@ const app = express();
 app.get('/save-gif', async (req, res) => {
   try {
     const gif = await getGif(req.query.url as string);
-    const gifFile = bucket.file(`${req.query.locationCode}.gif`);
+    const gifFileName = `${req.query.locationCode}.gif`;
+    const gifFile = bucket.file(gifFileName);
     await gifFile.save(gif);
-    res.status(200).send('OK').end();
+    await db.collection('turfs').doc(req.query.turfId as string).update({gifFileName})
+    res.status(200).send(gifFileName).end();
   } catch(e: any) {
     console.log(e.message)
     res.status(400).send(e.message).end();
