@@ -5,7 +5,7 @@ import { getStorage } from "firebase-admin/storage";
 import GIFEncoder from "gifencoder";
 import puppeteer from "puppeteer";
 
-admin.initializeApp();
+admin.initializeApp({ storageBucket: "gs://mapmaker-330220.appspot.com" });
 export const bucket = getStorage().bucket();
 const db = admin.firestore();
 
@@ -14,14 +14,16 @@ const url =
   "https://cardanospace.mypinata.cloud/ipfs/Qme8kVR1iqQWGtWrZpfzbkEN7ueXR7KqyeKyvYkNtMEJBA?skipIntro=1";
 
 const app = express();
+app.use(express.json());
 
-app.get('/save-gif', async (req, res) => {
+app.post('/save-gif', async (req, res) => {
   try {
-    const gif = await getGif(req.query.url as string);
-    const gifFileName = `${req.query.locationCode}.gif`;
+    const {url, locationCode, turfId} = req.body;
+    const gif = await getGif(url as string);
+    const gifFileName = `${locationCode}.gif`;
     const gifFile = bucket.file(gifFileName);
     await gifFile.save(gif);
-    await db.collection('turfs').doc(req.query.turfId as string).update({gifFileName})
+    await db.collection('turfs').doc(turfId as string).update({gifFileName})
     res.status(200).send(gifFileName).end();
   } catch(e: any) {
     console.log(e.message)
