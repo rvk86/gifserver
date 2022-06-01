@@ -12,7 +12,7 @@ sudo service google-fluentd restart &
 
 # install node
 mkdir /opt/nodejs
-curl https://nodejs.org/download/release/latest-v16.x/node-v16.14.2-linux-x64.tar.gz | tar xvzf - -C /opt/nodejs --strip-components=1
+curl https://nodejs.org/download/release/v16.15.0/node-v16.15.0-linux-x64.tar.gz | tar xvzf - -C /opt/nodejs --strip-components=1
 ln -s /opt/nodejs/bin/node /usr/bin/node
 ln -s /opt/nodejs/bin/npm /usr/bin/npm
 
