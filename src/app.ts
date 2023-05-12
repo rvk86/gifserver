@@ -10,10 +10,12 @@ admin.initializeApp({ storageBucket: "gs://mapmaker-330220.appspot.com" });
 export const bucket = getStorage().bucket();
 const db = admin.firestore();
 
-const [width, height] = [500, 500];
+const [width, height] = [600, 600];
+const gifFrameCount = 80;
+const gifInitialSpeed = 0.2;
 const url =
-  "http://localhost:9199/v0/b/mapmaker-staging.appspot.com/o/kyiv_cardanofoundation.html?alt=media&token=15cfe79d-5a1d-44f9-a062-f8c034d47c5b&skipIntro=1";
-const locationCode = "CardanoThorPromo";
+  "https://storage.googleapis.com/mapmaker-330220.appspot.com/8FX42976%2BHR.html?skipIntro=true";
+const fileName = "test";
 
 const app = express();
 app.use(express.json());
@@ -21,7 +23,7 @@ app.use(express.json());
 app.get("/save-gif", async (req, res) => {
   try {
     const gif = await getGif(url as string);
-    const gifFileName = `${locationCode}.gif`;
+    const gifFileName = `${fileName}.gif`;
     writeFileSync(gifFileName, gif);
     res.status(200).send(gifFileName).end();
   } catch (e: any) {
@@ -59,6 +61,11 @@ app.listen(PORT, () => {
   console.log("Press Ctrl+C to quit.");
 });
 
+function circleXY(r: number, theta: number) {
+  theta = ((theta - 90) * Math.PI) / 180;
+  return [Math.round(r * Math.cos(theta)), Math.round(-r * Math.sin(theta))];
+}
+
 function getGif(website: string) {
   return new Promise<Buffer>(async (resolve, reject) => {
     try {
@@ -67,7 +74,7 @@ function getGif(website: string) {
       encoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
       // @ts-ignore
       encoder.setFrameRate(20);
-      encoder.setQuality(5);
+      encoder.setQuality(2);
       const fileStream = encoder.createReadStream();
       const chunks: any[] = [];
       fileStream.on("data", (chunk) => chunks.push(chunk));
@@ -84,33 +91,42 @@ function getGif(website: string) {
       await page.goto(website, {
         waitUntil: "domcontentloaded",
       });
-      await page.evaluate(() =>
-        // @ts-ignore
-        window.setControlSettings({ autoRotate: true, autoRotateSpeed: 0.1 })
-      );
-      await page.evaluate(() =>
-        setTimeout(
-          () =>
-            // @ts-ignore
-            window.setControlSettings({ autoRotate: true, autoRotateSpeed: 5 }),
-          15000
-        )
-      );
-      await page.waitForTimeout(100);
+      while (!(await page.evaluate(`window.introFinished`))) {
+        console.log(`WAITING FOR INTRO`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
 
       const canvas = createCanvas(width, height);
       const ctx = canvas.getContext("2d");
 
-      // @ts-ignore
-      while (!(await page.evaluate(() => window.fullCircle))) {
+      let theta = 0;
+      for (const index in Array(gifFrameCount).fill(0)) {
+        const [x, y] = circleXY(2000, theta);
+        await page.evaluate(`
+                window.controls.autoRotate = false;
+                window.camera.fov = 55;
+                window.camera.position.x = ${x};
+                window.camera.position.y = 0;
+                window.camera.position.z = ${y};
+              `);
+
         const buffer = await page.screenshot();
         const img = new Image();
         img.onload = () => {
           ctx.drawImage(img, 0, 0);
-          encoder.addFrame(ctx as globalThis.CanvasRenderingContext2D);
+          encoder.addFrame(
+            ctx as unknown as globalThis.CanvasRenderingContext2D
+          );
         };
         img.src = buffer;
+
+        const angle =
+          parseInt(index) < gifFrameCount / 2
+            ? (360 / gifFrameCount) * gifInitialSpeed
+            : (360 / gifFrameCount) * (2 - gifInitialSpeed);
+        theta = theta - angle;
       }
+
       encoder.finish();
       await browser.close();
     } catch (e) {
