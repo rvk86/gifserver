@@ -3,8 +3,8 @@ import puppeteer from "puppeteer";
 import sharp = require("sharp");
 
 const [width, height] = [600, 600];
-const gifFrameCount = 100;
-const gifInitialSpeed = 0.25;
+const gifFrameCount = 80;
+const gifInitialSpeed = 0.2;
 
 function circleXY(r: number, theta: number) {
   theta = ((theta - 90) * Math.PI) / 180;
